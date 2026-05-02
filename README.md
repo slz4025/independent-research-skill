@@ -1,5 +1,9 @@
 # independent-research-skill
 
-This is a Claude skill to do independent research on a question. It will provide you relevant sources from across the ideological spectrum. It groups sources by "Empirical Research" or "Explore". "Empirical Research" contains sources that perform data collection and/or data analysis. "Explore" contains sources that are interesting. Sources are rated on methodological quality.
+This includes sub-skills to do independent research:
+- tradeoff-table: evaluate options against attributes;
+- research: do deep research on some question.
 
-I mostly tested this for social questions. This is still a work-in-progress.
+The research skill is designed to present a person with a variety of high-quality sources across the ideological spectrum such that the person can judge the sources themselves. The skill will make Claude provide a citation to the source and quality metric based on methodology (if empirical) or on noteworthiness (if exploratory).
+
+This is a work-in-progress. I mostly tested this for questions I'm interested in, which tend to be about practical issues or social studies.

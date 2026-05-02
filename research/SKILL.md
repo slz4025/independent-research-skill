@@ -1,6 +1,6 @@
 ---
 name: research
-description: "Use this skill ONLY when the user explicitly begins their message with the word \"RESEARCH\" in all caps, followed by their question (e.g., \"RESEARCH does coffee cause cancer?\"). Do not trigger on any other phrasing, no matter how similar the intent."
+description: "Use this skill in two cases only: (1) when the user explicitly begins their message with the word \"RESEARCH\" in all caps, followed by their question (e.g., \"RESEARCH does coffee cause cancer?\"); or (2) when another skill explicitly invokes this skill as a sub-procedure under the contract in the Composition section below. Do not trigger on any other phrasing, no matter how similar the intent."
 ---
 
 # Research Skill
@@ -8,6 +8,37 @@ description: "Use this skill ONLY when the user explicitly begins their message 
 Find and present what research and firsthand sources say on the given question. The user does the synthesis; the skill assembles the inputs. Report uncomfortable findings directly; do not soften, omit, or hedge beyond what the evidence warrants. No emojis. No padding.
 
 Use natural, human-toned language throughout. Write as a thoughtful person summarizing what each source says, not an academic or a robot.
+
+---
+
+## Composition — invocation by other skills
+
+This skill is designed to be callable as a sub-procedure by other skills, not just as a top-level response to the `RESEARCH` keyword. A calling skill may invoke this one — typically per-question or per-cell within a larger workflow — provided it preserves the invariants below. Direct user invocation still requires the all-caps `RESEARCH` keyword; this section authorizes skill-to-skill calls only.
+
+**Invariants the caller must preserve (non-negotiable):**
+
+1. **One framed question per invocation.** Each call corresponds to a single research question with its own Rule 2 framing (population, outcome, time horizon, term operationalization, contested premises). Callers may not bundle multiple questions into one invocation to save checkpoints.
+
+2. **Per-invocation Rule 2 and Rule 2b checkpoints.** Every invocation runs the framed-question confirmation (Rule 2) and the tradition-coverage confirmation (Rule 2b) with the user, in that order, before any searching. The caller does not get to skip these on the grounds that an earlier invocation in the same workflow already ran them. The redundancy is the rigor — different questions warrant different framings and different traditions.
+
+3. **No batching, no parallel invocations.** Invocations run strictly serially. A caller running multiple research sub-procedures in one workflow runs them one at a time, with full checkpoints for each, and presents each output before starting the next. The user may halt or redirect between invocations.
+
+4. **All Empirical and Explore rules apply unchanged.** Source-text fidelity, prior-blind searching, WEIRD audit, cultural-default audit, no-synthesis, SHA-256 ordering — none of these are relaxed because the call is sub-procedural. A research output produced inside another workflow is held to the same standard as one produced from a direct `RESEARCH` keyword call.
+
+5. **Each invocation produces its own file.** Output goes to `/mnt/user-data/outputs/`. The caller specifies the filename; the default `research_report.md` is overridden when multiple invocations are expected, to avoid clobbering. Each file is presented with `present_files` as it completes.
+
+6. **Distillations belong to the caller, not this skill.** If the caller wants a short summary of the report for use elsewhere (e.g., a table cell, an executive summary, a recommendation), the caller writes that distillation from the produced file. This skill produces the file; it does not produce summaries of itself. Distillations written by the caller must reflect the file faithfully, including its uncertainties and conflicts, and must not introduce cross-source synthesis that the file itself forbids (per Both-Sections Rule 1).
+
+**What a caller looks like in practice:**
+
+A calling skill — for example, a decision-deliberation skill running researched cells in a comparison table — invokes this skill as if the user had typed `RESEARCH <question>` for each cell. The caller is responsible for:
+
+- Deciding which questions warrant the full procedure (vs. lighter-weight search).
+- Naming each output file distinctly.
+- Pausing for the user between invocations.
+- Writing any cross-cell or cross-question synthesis itself, after the fact, from the produced files.
+
+**Authorized callers as of this version:** `tradeoff-table` (invokes per `[RESEARCH]` cell at its Step 4). New caller skills may be added; each must honor the invariants above.
 
 ---
 
